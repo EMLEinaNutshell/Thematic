@@ -1,0 +1,2395 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>EMLE Admin Analytics — لوحة تحليل الحسابات وبنك الأسئلة</title>
+<style>
+  :root {
+    --bg: #f4f6f8;
+    --surface: #ffffff;
+    --surface-subtle: #f8fafc;
+    --border: #e1e6eb;
+    --border-hover: #cbd5e1;
+    --text: #1d2939;
+    --text-secondary: #475467;
+    --text-muted: #667085;
+    --teal: #0a6c74;
+    --teal-hover: #07545a;
+    --teal-light: #eaf4f5;
+    --teal-border: #b8dce0;
+    --correct: #15803d;
+    --correct-bg: #f0fdf4;
+    --correct-border: #bbf7d0;
+    --hint: #b45309;
+    --hint-bg: #fffbeb;
+    --hint-border: #fde68a;
+    --wrong: #b91c1c;
+    --wrong-bg: #fef2f2;
+    --wrong-border: #fecaca;
+    --flag: #6d28d9;
+    --flag-bg: #f5f3ff;
+    --flag-border: #ddd6fe;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .ltr { direction: ltr; unicode-bidi: embed; }
+  .num { font-variant-numeric: tabular-nums; direction: ltr; display: inline-block; }
+
+  /* Top Bar */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand-badge {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--teal);
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .brand-title { font-weight: 800; font-size: 15.5px; color: var(--text); }
+  .brand-sub { font-size: 11.5px; color: var(--text-muted); }
+
+  .top-actions {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .admin-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--teal-light);
+    border: 1px solid var(--teal-border);
+    color: var(--teal);
+    font-size: 12px;
+    font-weight: 700;
+  }
+  .btn {
+    appearance: none;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.14s;
+    text-decoration: none;
+  }
+  .btn:hover { background: var(--surface-subtle); border-color: var(--border-hover); }
+  .btn-primary {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--teal-hover); border-color: var(--teal-hover); }
+  .btn-danger { color: var(--wrong); border-color: var(--wrong-border); background: var(--wrong-bg); }
+  .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  /* Auth Gate */
+  .gate-wrap {
+    min-height: calc(100vh - 60px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+  .gate-card {
+    width: 100%;
+    max-width: 460px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px 24px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+  }
+  .gate-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 14px;
+    border-radius: 14px;
+    background: var(--teal-light);
+    border: 1px solid var(--teal-border);
+    color: var(--teal);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+  }
+  .gate-title { margin: 0 0 8px; font-size: 19px; font-weight: 800; }
+  .gate-desc { margin: 0 0 20px; color: var(--text-secondary); font-size: 13.5px; }
+  .google-btn {
+    width: 100%;
+    padding: 11px 16px;
+    border-radius: 9px;
+    border: 1px solid #d0d5dd;
+    background: #fff;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  }
+  .google-btn:hover { background: #f8fafc; border-color: #98a2b3; }
+  .alert-box {
+    margin-top: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    text-align: right;
+    border: 1px solid var(--wrong-border);
+    background: var(--wrong-bg);
+    color: var(--wrong);
+    display: none;
+  }
+  .alert-box.show { display: block; }
+  .alert-box.warn {
+    border-color: var(--hint-border);
+    background: var(--hint-bg);
+    color: var(--hint);
+  }
+
+  /* Main Container */
+  .container {
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 20px 18px 48px;
+    display: none;
+  }
+  .container.visible { display: block; }
+
+  .meta-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* KPI Grid */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(195px, 1fr));
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .kpi-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .kpi-val {
+    font-size: 25px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+  }
+  .kpi-sub {
+    margin-top: 4px;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+  }
+
+  /* Tabs */
+  .tabs-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  .tab-btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.14s;
+  }
+  .tab-btn:hover { border-color: var(--teal-border); color: var(--teal); }
+  .tab-btn.active {
+    background: var(--teal);
+    border-color: var(--teal);
+    color: #fff;
+  }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* Cards & Panels */
+  .grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .panel-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .panel-title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+  }
+  .panel-sub { font-size: 12px; color: var(--text-muted); }
+
+  /* Daily Bar Chart */
+  .chart-wrap {
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .bar-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    height: 160px;
+    padding-top: 22px;
+    min-width: 520px;
+    direction: ltr;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    height: 100%;
+    justify-content: flex-end;
+  }
+  .bar-num {
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
+  .bar-rect {
+    width: 100%;
+    max-width: 24px;
+    min-height: 3px;
+    border-radius: 4px 4px 0 0;
+    background: linear-gradient(180deg, #0d858f, var(--teal));
+    transition: opacity 0.15s;
+  }
+  .bar-rect.zero { background: var(--border); min-height: 2px; }
+  .bar-lbl {
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* Distribution Rows */
+  .dist-list { display: flex; flex-direction: column; gap: 10px; }
+  .dist-row { display: flex; flex-direction: column; gap: 4px; }
+  .dist-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+  .dist-track {
+    height: 8px;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .dist-fill {
+    height: 100%;
+    background: var(--teal);
+    border-radius: 999px;
+  }
+
+  /* Filters & Toolbar */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .fpill {
+    border: 1px solid var(--border);
+    background: var(--surface-subtle);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 4px 11px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .fpill.active {
+    background: var(--teal-light);
+    border-color: var(--teal-border);
+    color: var(--teal);
+  }
+  .controls-right {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+  .input, .select {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    border-radius: 7px;
+    padding: 6px 10px;
+    font-size: 12.5px;
+  }
+  .input:focus, .select:focus {
+    outline: none;
+    border-color: var(--teal);
+  }
+
+  /* Tables */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.8px;
+    background: var(--surface);
+  }
+  th, td {
+    padding: 9px 10px;
+    border-bottom: 1px solid var(--border);
+    text-align: right;
+    vertical-align: middle;
+  }
+  th {
+    background: var(--surface-subtle);
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  tbody tr.clickable { cursor: pointer; }
+  tbody tr.clickable:hover { background: #f3f9fa; }
+  tbody tr:last-child td { border-bottom: none; }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .b-green { background: var(--correct-bg); color: var(--correct); border-color: var(--correct-border); }
+  .b-teal { background: var(--teal-light); color: var(--teal); border-color: var(--teal-border); }
+  .b-amber { background: var(--hint-bg); color: var(--hint); border-color: var(--hint-border); }
+  .b-red { background: var(--wrong-bg); color: var(--wrong); border-color: var(--wrong-border); }
+  .b-gray { background: var(--surface-subtle); color: var(--text-muted); border-color: var(--border); }
+
+  .user-cell-name { font-weight: 700; color: var(--text); }
+  .user-cell-email { font-size: 11.5px; color: var(--text-muted); direction: ltr; display: block; text-align: right; }
+
+  .opt-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    direction: ltr;
+  }
+  .opt-chip {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 5px;
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+  .opt-chip.verified {
+    background: var(--correct-bg);
+    border-color: var(--correct-border);
+    color: var(--correct);
+    font-weight: 700;
+  }
+  .opt-chip.distractor-high {
+    background: var(--wrong-bg);
+    border-color: var(--wrong-border);
+    color: var(--wrong);
+    font-weight: 700;
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    z-index: 300;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal-card {
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    width: 100%;
+    max-width: 680px;
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 20px;
+    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.2);
+  }
+  .modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .mini-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .mini-stat {
+    background: var(--surface-subtle);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .mini-stat .l { font-size: 11px; color: var(--text-muted); }
+  .mini-stat .v { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  .loading-bar {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-secondary);
+    font-weight: 600;
+  }
+
+  @media (max-width: 680px) {
+    .topbar { padding: 8px 12px; }
+    .container { padding: 14px 10px 36px; }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .kpi-val { font-size: 21px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-badge">EM</div>
+    <div>
+      <div class="brand-title">EMLE Admin Analytics</div>
+      <div class="brand-sub">لوحة متابعة الحسابات المسجلة والنشاط وبنك الأسئلة</div>
+    </div>
+  </div>
+  <div class="top-actions" id="topActions" style="display:none;">
+    <span class="admin-pill ltr" id="adminEmailBadge"></span>
+    <button class="btn btn-primary" id="refreshBtn" onclick="loadDashboardData()">🔄 تحديث</button>
+    <a class="btn" href="index.html">فتح المنصة</a>
+    <button class="btn btn-danger" onclick="adminSignOut()">خروج</button>
+  </div>
+</header>
+
+<main class="gate-wrap" id="authGate">
+  <div class="gate-card">
+    <div class="gate-icon">🔐</div>
+    <h1 class="gate-title">لوحة تحكم الإدارة</h1>
+    <p class="gate-desc" id="gateDesc">
+      هذه الصفحة مخصصة لحساب الإدارة فقط (<span class="ltr">ahmedsakr0013@gmail.com</span>) ولا يمكن لأي حساب آخر قراءة بيانات الطلاب من Firestore.
+    </p>
+    <button class="google-btn" id="googleSignInBtn" onclick="adminSignIn()">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17Z"/>
+        <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24Z"/>
+        <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14Z"/>
+        <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96Z"/>
+      </svg>
+      <span>Sign in with Google</span>
+    </button>
+    <div id="switchAccountWrap" style="display:none; margin-top:12px;">
+      <button class="btn btn-danger" onclick="adminSignOut()">تسجيل الخروج وتبديل الحساب</button>
+    </div>
+    <div class="alert-box" id="gateError"></div>
+  </div>
+</main>
+
+<div class="container" id="dashboardWrap">
+  <div class="meta-strip">
+    <div>المشروع: <strong class="ltr">emle-vip-notes-qbank</strong> • فهرس الأسئلة: <span id="catalogStatusText">جاري الفحص...</span></div>
+    <div id="lastFetchText"></div>
+  </div>
+
+  <div class="alert-box warn" id="rulesWarningBox" style="margin-bottom:14px;"></div>
+
+  <div class="kpi-grid" id="kpiGrid"></div>
+
+  <div class="tabs-bar">
+    <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">📊 نظرة عامة والنشاط</button>
+    <button class="tab-btn" data-tab="users" onclick="switchTab('users')">👥 الحسابات والطلاب</button>
+    <button class="tab-btn" data-tab="qstats" onclick="switchTab('qstats')">🧠 تحليل الأسئلة (qStats)</button>
+    <button class="tab-btn" data-tab="chapters" onclick="switchTab('chapters')">📚 تفاعل الشابترات</button>
+    <button class="tab-btn" data-tab="reports" onclick="switchTab('reports')">🚨 تقارير وبلاغات الأسئلة (<span id="reportsBadgeCount">0</span>)</button>
+  </div>
+
+  <section class="tab-panel active" id="tab-overview">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">النشاط اليومي خلال آخر 21 يوماً</h2>
+          <div class="panel-sub">عدد الطلاب النشطين في كل يوم (بناءً على سجل الأيام وتاريخ آخر مزامنة)</div>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <div class="bar-chart" id="dailyActivityChart"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">⏰ نشاط الطلاب وأوقات الذروة على مدار اليوم (24 ساعة)</h2>
+          <div class="panel-sub">توزيع فترات نشاط ومزامنة الطلاب لاكتشاف ساعات الضغط والذروة الأكثر استخداماً</div>
+        </div>
+        <div id="peakHourBadge" style="display:inline-flex; align-items:center; gap:6px; background:#fef2f2; border:1px solid #fecaca; color:#b91c1c; padding:5px 12px; border-radius:6px; font-size:12px; font-weight:700;"></div>
+      </div>
+      <div class="chart-wrap">
+        <div class="bar-chart" id="hourlyActivityChart" style="min-width:720px;"></div>
+      </div>
+      <div class="time-periods-summary" id="timePeriodsSummary" style="display:flex; gap:12px; flex-wrap:wrap; margin-top:14px; padding-top:12px; border-top:1px solid var(--border);"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">مستويات تفاعل الحسابات</h2>
+          <span class="panel-sub">توزيع الطلاب حسب عدد الأسئلة المحلولة</span>
+        </div>
+        <div class="dist-list" id="engagementDistList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">أنظمة التشغيل والأجهزة</h2>
+          <span class="panel-sub">من آخر جهاز سجّل مزامنة للحساب</span>
+        </div>
+        <div class="dist-list" id="deviceDistList"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:16px;">
+      <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+        <div>
+          <h2 class="panel-title">📍 توزيع ونسبة المستخدمين حسب المحافظات</h2>
+          <span class="panel-sub">الانتشار الجغرافي ونسبة الطلاب في كل محافظة من محافظات مصر</span>
+        </div>
+        <div id="govSummaryBadge" style="font-size:12px; font-weight:700; color:var(--teal); background:var(--teal-light); border:1px solid var(--teal-border); padding:4px 10px; border-radius:999px;">جاري الحساب...</div>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:12px;">
+        <div>
+          <div class="dist-list" id="governorateDistList" style="max-height:360px; overflow-y:auto; padding-left:4px;"></div>
+        </div>
+        <div id="govHighlights" style="display:flex; flex-direction:column; gap:10px;"></div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">🏆 أكثر الطلاب حلاً للأسئلة</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>الطالب</th><th>تم حلها</th><th>الدقة</th><th>آخر نشاط</th></tr>
+            </thead>
+            <tbody id="topSolversBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <h2 class="panel-title">⚡ آخر الحسابات نشاطاً</h2>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>الطالب</th><th>تم حلها</th><th>مواضيع</th><th>آخر نشاط</th></tr>
+            </thead>
+            <tbody id="recentActiveBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="tab-users">
+    <div class="panel">
+      <div class="toolbar">
+        <div class="filter-pills" id="userFilterPills">
+          <button class="fpill active" data-filter="all" onclick="setUserFilter('all')">الكل</button>
+          <button class="fpill" data-filter="active_1d" onclick="setUserFilter('active_1d')">نشط اليوم</button>
+          <button class="fpill" data-filter="active_7d" onclick="setUserFilter('active_7d')">آخر 7 أيام</button>
+          <button class="fpill" data-filter="active_30d" onclick="setUserFilter('active_30d')">آخر 30 يوماً</button>
+          <button class="fpill" data-filter="dormant" onclick="setUserFilter('dormant')">خامل (+30 يوم)</button>
+          <button class="fpill" data-filter="has_solved" onclick="setUserFilter('has_solved')">بدأ الحل</button>
+          <button class="fpill" data-filter="zero_solved" onclick="setUserFilter('zero_solved')">بدون حلول (0)</button>
+        </div>
+        <div class="controls-right">
+          <select class="select" id="userGovFilter" onchange="renderUsersTable()" title="فلترة حسب المحافظة">
+            <option value="all">كل المحافظات</option>
+          </select>
+          <input class="input" id="userSearchInput" type="search" placeholder="بحث بالاسم أو الإيميل أو المحافظة..." oninput="renderUsersTable()">
+          <select class="select" id="userSortSelect" onchange="renderUsersTable()">
+            <option value="recent">الأحدث نشاطاً</option>
+            <option value="solved_desc">الأكثر حلاً للأسئلة</option>
+            <option value="acc_desc">الأعلى دقة (%)</option>
+            <option value="topics_desc">الأكثر قراءة للمواضيع</option>
+            <option value="streak_desc">الأطول Streak</option>
+          </select>
+          <button class="btn" onclick="exportUsersCsv()">⬇ تصدير CSV</button>
+        </div>
+      </div>
+      <div class="meta-strip" style="margin-bottom:8px;">
+        <span id="usersCountLabel"></span>
+        <span>اضغط على أي طالب لعرض تفاصيل نشاطه وتعديل محافظته</span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الطالب</th>
+              <th>المحافظة</th>
+              <th>الحالة</th>
+              <th>الأسئلة</th>
+              <th>الدقة</th>
+              <th>المواضيع</th>
+              <th>Streak</th>
+              <th>الجهاز</th>
+              <th>آخر نشاط</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="tab-qstats">
+    <div class="panel">
+      <div class="toolbar">
+        <div class="filter-pills" id="qFilterPills">
+          <button class="fpill active" data-qfilter="hardest" onclick="setQFilter('hardest')">أصعب الأسئلة (&ge;5 أصوات)</button>
+          <button class="fpill" data-qfilter="misleading" onclick="setQFilter('misleading')">خيار خطأ تغلّب على الصح</button>
+          <button class="fpill" data-qfilter="most_voted" onclick="setQFilter('most_voted')">الأكثر تصويتاً</button>
+          <button class="fpill" data-qfilter="below_min" onclick="setQFilter('below_min')">أقل من 5 أصوات</button>
+        </div>
+        <div class="controls-right">
+          <input class="input" id="qSearchInput" type="search" placeholder="بحث برقم السؤال أو الشابتر..." oninput="renderQStatsTable()">
+        </div>
+      </div>
+      <div class="meta-strip" style="margin-bottom:8px;">
+        <span id="qStatsSummaryLabel"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>سؤال #</th>
+              <th>الشابتر / الموضوع</th>
+              <th>الأصوات</th>
+              <th>نسبة الإجابة الصحيحة</th>
+              <th>توزيع اختيارات الطلاب</th>
+            </tr>
+          </thead>
+          <tbody id="qStatsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="tab-chapters">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">تفاعل الطلاب حسب الشابتر</h2>
+          <div class="panel-sub">مبني على إجابات الطلاب المسجلين وعدد المواضيع المقروءة في كل شابتر</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>الشابتر</th>
+              <th>الأسئلة / المواضيع</th>
+              <th>إجمالي الحلول</th>
+              <th>نسبة الدقة</th>
+              <th>طلاب حلّوا فيه</th>
+              <th>قراءات المواضيع</th>
+            </tr>
+          </thead>
+          <tbody id="chaptersTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="tab-panel" id="tab-reports">
+    <div class="panel">
+      <div class="panel-header">
+        <div>
+          <h2 class="panel-title">🚨 تقارير وبلاغات الطلاب حول الأسئلة</h2>
+          <div class="panel-sub">البلاغات الواردة من الطلاب على الأسئلة لمراجعتها وتصحيحها في المنصة</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <select class="select" id="reportStatusFilter" onchange="renderReportsTable()">
+            <option value="all">كل التقارير</option>
+            <option value="pending" selected>قيد المراجعة فقط</option>
+            <option value="resolved">تمت المعالجة</option>
+          </select>
+          <button class="btn btn-sm" onclick="loadDashboardData()">🔄 تحديث</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>رقم السؤال</th>
+              <th>نوع المشكلة</th>
+              <th>تفاصيل الملاحظة</th>
+              <th>الطالب</th>
+              <th>الحالة</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="reportsTableBody">
+            <tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">لا توجد تقارير محملة حالياً</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="modal-backdrop" id="studentModal" onclick="if(event.target===this) closeStudentModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <h3 style="margin:0 0 2px;" id="modalStudentName"></h3>
+        <div class="ltr" style="font-size:12.5px; color:var(--text-muted);" id="modalStudentEmail"></div>
+      </div>
+      <button class="btn" onclick="closeStudentModal()">✕ إغلاق</button>
+    </div>
+    <div id="modalStudentBody"></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+<script src="data.js" onerror="window.__EMLE_DATA_MISSING = true;"></script>
+<script>
+const ADMIN_ALLOWLIST = ["ahmedsakr0013@gmail.com"];
+const firebaseConfig = {
+  apiKey: "AIzaSyCdOk7opdoWanL3OT4CfR58Fwoot6bEKDw",
+  authDomain: "emle-vip-notes-qbank.firebaseapp.com",
+  projectId: "emle-vip-notes-qbank",
+  storageBucket: "emle-vip-notes-qbank.firebasestorage.app",
+  messagingSenderId: "351882234442",
+  appId: "1:351882234442:web:50cb1484d3dc3389b6f4b3",
+  measurementId: "G-B3J7EV0PDY"
+};
+
+let fbApp = null;
+let fbAuth = null;
+let fbDb = null;
+let currentAdminUser = null;
+let catalogData = null;
+let catalogIndexes = null;
+let processedUsers = [];
+let globalAnalytics = null;
+let qStatsRows = [];
+let activeUserFilter = "all";
+let activeQFilter = "hardest";
+
+function isVerifiedAdmin(user) {
+  if (!user || !user.email || user.emailVerified === false) return false;
+  return ADMIN_ALLOWLIST.includes(String(user.email).trim().toLowerCase());
+}
+
+function escapeHtml(str) {
+  return String(str == null ? "" : str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function formatDateKeyLocal(ms) {
+  const d = new Date(ms);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function formatRelativeTime(ms, nowMs) {
+  if (!ms) return "غير معروف";
+  const diffSec = Math.max(0, Math.floor((nowMs - ms) / 1000));
+  if (diffSec < 60) return "الآن";
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return `منذ ${diffMin} د`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `منذ ${diffHr} س`;
+  const diffDays = Math.floor(diffHr / 24);
+  if (diffDays === 1) return "أمس";
+  if (diffDays < 30) return `منذ ${diffDays} يوم`;
+  const diffMonths = Math.floor(diffDays / 30);
+  return `منذ ${diffMonths} شهر`;
+}
+
+function formatExactDateTime(ms) {
+  if (!ms) return "—";
+  try {
+    return new Date(ms).toLocaleString("en-GB", {
+      year: "numeric", month: "short", day: "2-digit",
+      hour: "2-digit", minute: "2-digit"
+    });
+  } catch (e) {
+    return new Date(ms).toISOString();
+  }
+}
+
+function parseDeviceInfo(uaRaw) {
+  const ua = String(uaRaw || "");
+  if (!ua) return { os: "غير معروف", isMobile: false };
+  if (/iPhone|iPad|iPod/i.test(ua)) return { os: "iOS", isMobile: true };
+  if (/Android/i.test(ua)) return { os: "Android", isMobile: true };
+  if (/Windows/i.test(ua)) return { os: "Windows", isMobile: false };
+  if (/Macintosh|Mac OS X/i.test(ua)) return { os: "Mac", isMobile: false };
+  if (/Linux/i.test(ua)) return { os: "Linux", isMobile: false };
+  return { os: "أخرى", isMobile: /Mobile/i.test(ua) };
+}
+
+function parseTimestampMillis(raw) {
+  if (!raw) return 0;
+  const ts = raw.updatedAt;
+  if (ts) {
+    if (typeof ts.toMillis === "function") return ts.toMillis();
+    if (typeof ts.seconds === "number") return ts.seconds * 1000;
+    if (ts instanceof Date) return ts.getTime();
+    if (typeof ts === "number" && Number.isFinite(ts)) return ts;
+    if (typeof ts === "string") {
+      const p = Date.parse(ts);
+      if (!Number.isNaN(p)) return p;
+    }
+  }
+  const streak = raw.streak || {};
+  const candidateKeys = [];
+  if (streak.lastDate && /^\d{4}-\d{2}-\d{2}$/.test(streak.lastDate)) candidateKeys.push(streak.lastDate);
+  if (streak.days && typeof streak.days === "object") {
+    for (const [k, v] of Object.entries(streak.days)) {
+      if (/^\d{4}-\d{2}-\d{2}$/.test(k) && Number(v) > 0) candidateKeys.push(k);
+    }
+  }
+  if (candidateKeys.length > 0) {
+    candidateKeys.sort();
+    const last = candidateKeys[candidateKeys.length - 1];
+    const parsed = Date.parse(last + "T12:00:00");
+    if (!Number.isNaN(parsed)) return parsed;
+  }
+  return 0;
+}
+
+function classifyQuestionStatus(st) {
+  if (!st || typeof st !== "object") return null;
+  const isValidChoice = typeof st.selected === "number" && Number.isInteger(st.selected) && st.selected >= 0 && st.selected <= 4;
+  const isRevealed = st.selected === -1 || !!st.revealed;
+  if (!isValidChoice && !isRevealed) return null;
+  return {
+    isValidChoice,
+    isRevealed,
+    isCorrect: st.status === "correct" || st.status === "hint",
+    isWrong: st.status === "wrong",
+    hintUsed: !!st.hintUsed,
+    flagged: !!st.flagged
+  };
+}
+
+const EGYPT_GOV_MAP = [
+  { gov: "القاهرة", keywords: ["cairo", "qahirah", "helwan", "maadi", "nasr city", "heliopolis", "shubra", "cu.edu.eg", "kasralainy", "asu.edu.eg", "ain shams", "al-azhar", "azhar"] },
+  { gov: "الجيزة", keywords: ["giza", "jizah", "6th of october", "october", "sheikh zayed", "zayed", "haram", "dokki", "agouza", "o6u", "msa", "must"] },
+  { gov: "الإسكندرية", keywords: ["alexandria", "iskandariyah", "alex", "smouha", "miami", "borg el arab", "alexu.edu.eg"] },
+  { gov: "الدقهلية", keywords: ["dakahlia", "daqahliya", "daqahliyah", "al mansurah", "mansoura", "mansura", "bilqas", "talkha", "mit ghamr", "sinbillawayn", "dikirnis", "mans.edu.eg"] },
+  { gov: "الغربية", keywords: ["gharbia", "gharbiyah", "tanta", "al mahallah al kubra", "mahalla", "kafr el zayat", "zefta", "tanta.edu.eg"] },
+  { gov: "الشرقية", keywords: ["sharqia", "sharqiyah", "ash sharqiyah", "zagazig", "10th of ramadan", "bilbeis", "faqus", "minya al qamh", "zu.edu.eg"] },
+  { gov: "القليوبية", keywords: ["qalyubia", "qalyubiyah", "al qalyubiyah", "banha", "benha", "shubra al khaymah", "qalyub", "khanka", "bu.edu.eg"] },
+  { gov: "المنوفية", keywords: ["monufia", "monufiyah", "menofia", "al minufiyah", "shibin al kawm", "shibin el kom", "menouf", "ashmoun", "sadat city", "menofia.edu.eg"] },
+  { gov: "البحيرة", keywords: ["beheira", "buhayrah", "al buhayrah", "damanhur", "kafr el dawwar", "edko", "rashid", "rosetta", "dmu.edu.eg"] },
+  { gov: "كفر الشيخ", keywords: ["kafr el sheikh", "kafr ash shaykh", "desouk", "disuq", "baltim", "kfs.edu.eg"] },
+  { gov: "دمياط", keywords: ["damietta", "dumyat", "ras el bar", "faraskur", "du.edu.eg"] },
+  { gov: "بورسعيد", keywords: ["port said", "bur said", "port fouad", "psu.edu.eg"] },
+  { gov: "الإسماعيلية", keywords: ["ismailia", "al ismailiyah", "fayid", "qantara", "suez.edu.eg", "scu.edu.eg"] },
+  { gov: "السويس", keywords: ["suez", "as suways", "ain sokhna"] },
+  { gov: "الفيوم", keywords: ["fayoum", "faiyum", "al fayyum", "ibshaway", "fayoum.edu.eg"] },
+  { gov: "بني سويف", keywords: ["beni suef", "bani suwayf", "bns", "nasser", "bsu.edu.eg"] },
+  { gov: "المنيا", keywords: ["minya", "al minya", "malawi", "samalut", "maghagha", "minia.edu.eg"] },
+  { gov: "أسيوط", keywords: ["asyut", "assiut", "al asyut", "dairut", "manfalut", "qusiya", "abnub", "aun.edu.eg"] },
+  { gov: "سوهاج", keywords: ["sohag", "suhaj", "akhmim", "girga", "tahta", "sohag.edu.eg"] },
+  { gov: "قنا", keywords: ["qena", "qina", "nagaa hammadi", "dishna", "qus", "svu.edu.eg"] },
+  { gov: "الأقصر", keywords: ["luxor", "al uqsur", "esna", "armant"] },
+  { gov: "أسوان", keywords: ["aswan", "kom ombo", "edfu", "aswu.edu.eg"] },
+  { gov: "البحر الأحمر", keywords: ["red sea", "al bahr al ahmar", "hurghada", "safaga", "el gouna", "marsa alam"] },
+  { gov: "مطروح", keywords: ["matrouh", "matruh", "marsa matruh", "siwa", "el alamein", "alamein"] },
+  { gov: "الوادي الجديد", keywords: ["new valley", "al wadi al jadid", "kharga", "dakhla"] },
+  { gov: "شمال سيناء", keywords: ["north sinai", "shamal sina", "arish", "al arish"] },
+  { gov: "جنوب سيناء", keywords: ["south sinai", "janub sina", "sharm el sheikh", "sharm", "dahab", "nuweiba"] }
+];
+
+function resolveGovernorateFromText(text) {
+  if (!text) return "";
+  const lower = String(text).toLowerCase();
+  for (const item of EGYPT_GOV_MAP) {
+    for (const kw of item.keywords) {
+      if (lower.includes(kw)) {
+        return item.gov;
+      }
+    }
+  }
+  return "";
+}
+
+function computeUserRecord(uid, raw, nowMs = Date.now()) {
+  const data = raw || {};
+  const email = String(data.userEmail || "").trim();
+  const displayName = String(data.displayName || "").trim() || (email ? email.split("@")[0] : "بدون اسم");
+  const qStatus = (data.qStatus && typeof data.qStatus === "object") ? data.qStatus : {};
+  const topicsRead = (data.topicsRead && typeof data.topicsRead === "object") ? data.topicsRead : {};
+  const streak = (data.streak && typeof data.streak === "object") ? data.streak : {};
+  const streakDays = (streak.days && typeof streak.days === "object") ? streak.days : {};
+
+  let solvedValid = 0;
+  let revealedCount = 0;
+  let correctCount = 0;
+  let wrongCount = 0;
+  let hintCount = 0;
+  let flaggedCount = 0;
+
+  for (const st of Object.values(qStatus)) {
+    const info = classifyQuestionStatus(st);
+    if (!info) continue;
+    if (info.isValidChoice) solvedValid++;
+    if (info.isRevealed) revealedCount++;
+    if (info.isCorrect) correctCount++;
+    else if (info.isWrong) wrongCount++;
+    if (info.hintUsed) hintCount++;
+    if (info.flagged) flaggedCount++;
+  }
+
+  const totalAttempted = solvedValid + revealedCount;
+  const accuracy = totalAttempted > 0 ? Math.round((correctCount / totalAttempted) * 100) : null;
+  let topicsReadCount = 0;
+  for (const val of Object.values(topicsRead)) {
+    if (val) topicsReadCount++;
+  }
+
+  let activeDaysCount = 0;
+  for (const val of Object.values(streakDays)) {
+    if (Number(val) > 0) activeDaysCount++;
+  }
+
+  const lastActiveMs = parseTimestampMillis(data);
+  const daysSinceActive = lastActiveMs > 0 ? (nowMs - lastActiveMs) / 86400000 : Infinity;
+  const todayKey = formatDateKeyLocal(nowMs);
+  const activeTodayByStreak = Number(streakDays[todayKey] || 0) > 0;
+  const recency = (daysSinceActive <= 1 || activeTodayByStreak)
+    ? "today"
+    : (daysSinceActive <= 7 ? "week" : (daysSinceActive <= 30 ? "month" : "dormant"));
+
+  const device = parseDeviceInfo(data.userAgent);
+  let governorate = String(data.governorate || data.gov || data.city || "").trim();
+  let govSource = data.govSource || (governorate ? "saved" : "");
+
+  if (!governorate) {
+    const fromEmail = resolveGovernorateFromText(data.userEmail || email || "");
+    if (fromEmail) {
+      governorate = fromEmail;
+      govSource = "email_domain";
+    } else if (data.ipRegion || data.ipCity) {
+      const fromIp = resolveGovernorateFromText(`${data.ipRegion || ""} ${data.ipCity || ""}`);
+      if (fromIp) {
+        governorate = fromIp;
+        govSource = "ip_geo";
+      }
+    }
+  }
+
+  if (!governorate) {
+    governorate = "غير محدد";
+    govSource = "unknown";
+  }
+
+  return {
+    uid,
+    displayName,
+    email,
+    governorate,
+    govSource,
+    lastIp: data.lastIp || "",
+    ipCity: data.ipCity || "",
+    ipRegion: data.ipRegion || "",
+    solvedValid,
+    revealedCount,
+    totalAttempted,
+    correctCount,
+    wrongCount,
+    hintCount,
+    flaggedCount,
+    accuracy,
+    topicsReadCount,
+    streakCurrent: Math.max(0, Number(streak.current) || 0),
+    streakBest: Math.max(0, Number(streak.best) || 0),
+    todayQs: Math.max(0, Number(streak.todayQs) || 0),
+    activeDaysCount,
+    streakDays,
+    lastActiveMs,
+    daysSinceActive,
+    recency,
+    os: device.os,
+    isMobile: device.isMobile,
+    qStatus,
+    topicsRead
+  };
+}
+
+function buildCatalogIndexes(data) {
+  if (!data) return null;
+  const chapTitleById = {};
+  for (const ch of (data.chapters || [])) {
+    chapTitleById[ch.id] = ch.title || ch.name || String(ch.id);
+  }
+  const topicById = {};
+  for (const t of (data.topics || [])) {
+    topicById[t.id] = {
+      id: t.id,
+      num: t.num,
+      title: t.title || ("Topic " + t.id),
+      chapterId: t.chapter_id,
+      chapterTitle: chapTitleById[t.chapter_id] || String(t.chapter_id || ""),
+      qCount: t.q_count || 0
+    };
+  }
+  const questionByNum = {};
+  for (const q of (data.questions || [])) {
+    const t = topicById[q.topic_id] || null;
+    questionByNum[String(q.number)] = {
+      number: q.number,
+      topicId: q.topic_id,
+      topicTitle: t ? t.title : "",
+      chapterId: t ? t.chapterId : (q.chapter_id || ""),
+      chapterTitle: t ? t.chapterTitle : (chapTitleById[q.chapter_id] || ""),
+      verifiedAnswer: q.verified_answer,
+      optCount: Array.isArray(q.options) ? q.options.length : 5,
+      stemSnippet: String(q.stem || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 120)
+    };
+  }
+  return { chapTitleById, topicById, questionByNum, raw: data };
+}
+
+function computeGlobalAnalytics(users, qStatsList, indexes, nowMs = Date.now()) {
+  const totalUsers = users.length;
+  let usersWithAnswers = 0;
+  let zeroAnswerUsers = 0;
+  let usersWithTopics = 0;
+  let active1d = 0;
+  let active7d = 0;
+  let active30d = 0;
+  let dormantUsers = 0;
+  let totalAnswersAll = 0;
+  let totalCorrectAll = 0;
+  let totalTopicsReadAll = 0;
+
+  const osCounts = { iOS: 0, Android: 0, Windows: 0, Mac: 0, Linux: 0, "غير معروف": 0, "أخرى": 0 };
+  const govCounts = {};
+  let usersWithGov = 0;
+  const buckets = { p500: 0, p100: 0, p20: 0, p1: 0, zero: 0 };
+  const solvedCountsForMedian = [];
+
+  // Last 21 days daily active user sets
+  const dayKeys = [];
+  const dayActiveSets = {};
+  const dayEventsSum = {};
+  for (let i = 20; i >= 0; i--) {
+    const dKey = formatDateKeyLocal(nowMs - i * 86400000);
+    dayKeys.push(dKey);
+    dayActiveSets[dKey] = new Set();
+    dayEventsSum[dKey] = 0;
+  }
+
+  for (const u of users) {
+    if (u.totalAttempted > 0) {
+      usersWithAnswers++;
+      solvedCountsForMedian.push(u.totalAttempted);
+    } else {
+      zeroAnswerUsers++;
+    }
+    if (u.topicsReadCount > 0) usersWithTopics++;
+
+    if (u.recency === "today") active1d++;
+    if (u.recency === "today" || u.recency === "week") active7d++;
+    if (u.recency === "today" || u.recency === "week" || u.recency === "month") active30d++;
+    else dormantUsers++;
+
+    totalAnswersAll += u.totalAttempted;
+    totalCorrectAll += u.correctCount;
+    totalTopicsReadAll += u.topicsReadCount;
+
+    osCounts[u.os] = (osCounts[u.os] || 0) + 1;
+
+    const gName = u.governorate || "غير محدد";
+    govCounts[gName] = (govCounts[gName] || 0) + 1;
+    if (gName !== "غير محدد") usersWithGov++;
+
+    if (u.totalAttempted >= 500) buckets.p500++;
+    else if (u.totalAttempted >= 100) buckets.p100++;
+    else if (u.totalAttempted >= 20) buckets.p20++;
+    else if (u.totalAttempted >= 1) buckets.p1++;
+    else buckets.zero++;
+
+    for (const k of dayKeys) {
+      const cnt = Number(u.streakDays[k] || 0);
+      if (cnt > 0) {
+        dayActiveSets[k].add(u.uid);
+        dayEventsSum[k] += cnt;
+      }
+    }
+    if (u.lastActiveMs > 0) {
+      const lastKey = formatDateKeyLocal(u.lastActiveMs);
+      if (dayActiveSets[lastKey] && (u.totalAttempted > 0 || u.topicsReadCount > 0)) {
+        dayActiveSets[lastKey].add(u.uid);
+      }
+    }
+  }
+
+  solvedCountsForMedian.sort((a, b) => a - b);
+  const govSorted = Object.entries(govCounts).sort((a, b) => {
+    if (a[0] === "غير محدد" && b[0] !== "غير محدد") return 1;
+    if (b[0] === "غير محدد" && a[0] !== "غير محدد") return -1;
+    return b[1] - a[1];
+  });
+  const mid = Math.floor(solvedCountsForMedian.length / 2);
+  const medianAnswersActive = solvedCountsForMedian.length === 0
+    ? 0
+    : (solvedCountsForMedian.length % 2 === 0
+      ? Math.round((solvedCountsForMedian[mid - 1] + solvedCountsForMedian[mid]) / 2)
+      : solvedCountsForMedian[mid]);
+
+  const dailyActivity = dayKeys.map(k => ({
+    dateKey: k,
+    label: k.slice(5),
+    activeUsers: dayActiveSets[k].size,
+    events: dayEventsSum[k]
+  }));
+
+  // 24-Hour activity distribution based on lastActiveMs
+  const hourlyActiveMap = new Array(24).fill(0);
+  for (const u of users) {
+    if (u.lastActiveMs > 0) {
+      const h = new Date(u.lastActiveMs).getHours();
+      if (h >= 0 && h < 24) {
+        hourlyActiveMap[h]++;
+      }
+    }
+  }
+
+  let peakHour = 0;
+  let peakHourCount = 0;
+  for (let h = 0; h < 24; h++) {
+    if (hourlyActiveMap[h] > peakHourCount) {
+      peakHourCount = hourlyActiveMap[h];
+      peakHour = h;
+    }
+  }
+
+  const periods = {
+    night: hourlyActiveMap.slice(0, 6).reduce((a, b) => a + b, 0),
+    morning: hourlyActiveMap.slice(6, 12).reduce((a, b) => a + b, 0),
+    afternoon: hourlyActiveMap.slice(12, 18).reduce((a, b) => a + b, 0),
+    evening: hourlyActiveMap.slice(18, 24).reduce((a, b) => a + b, 0)
+  };
+
+  const hourlyActivity = hourlyActiveMap.map((cnt, h) => {
+    const isAm = h < 12;
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    const label = `${h12}${isAm ? "ص" : "م"}`;
+    const fullTimeStr = `${String(h).padStart(2, "0")}:00`;
+    return {
+      hour: h,
+      label,
+      fullTimeStr,
+      activeUsers: cnt,
+      isPeak: h === peakHour && cnt > 0
+    };
+  });
+
+  // QStats rows
+  let qTotalVotesAll = 0;
+  let qGe5Count = 0;
+  const parsedQRows = [];
+  for (const qDoc of qStatsList) {
+    const qnum = String(qDoc.id);
+    const d = qDoc.data || {};
+    const qMeta = indexes && indexes.questionByNum ? indexes.questionByNum[qnum] : null;
+    const optCount = qMeta ? qMeta.optCount : 5;
+    const counts = [];
+    for (let i = 0; i < optCount; i++) {
+      counts.push(Math.max(0, Math.floor(Number(d["c" + i]) || 0)));
+    }
+    const sumCounts = counts.reduce((a, b) => a + b, 0);
+    const total = Math.max(sumCounts, Math.floor(Number(d.total) || 0));
+    if (total <= 0) continue;
+    qTotalVotesAll += total;
+    if (total >= 5) qGe5Count++;
+
+    const verifiedIdx = qMeta && typeof qMeta.verifiedAnswer === "number" ? qMeta.verifiedAnswer : null;
+    const correctVotes = (verifiedIdx !== null && counts[verifiedIdx] !== undefined) ? counts[verifiedIdx] : null;
+    const correctPct = (correctVotes !== null && sumCounts > 0) ? Math.round((correctVotes / sumCounts) * 100) : null;
+
+    let topWrongIdx = -1;
+    let topWrongVotes = 0;
+    for (let i = 0; i < counts.length; i++) {
+      if (i !== verifiedIdx && counts[i] > topWrongVotes) {
+        topWrongVotes = counts[i];
+        topWrongIdx = i;
+      }
+    }
+    const isMisleading = correctVotes !== null && topWrongVotes > correctVotes && total >= 5;
+    parsedQRows.push({
+      qnum,
+      total,
+      counts,
+      sumCounts,
+      verifiedIdx,
+      correctPct,
+      topWrongIdx,
+      topWrongVotes,
+      isMisleading,
+      chapterTitle: qMeta ? qMeta.chapterTitle : "",
+      topicTitle: qMeta ? qMeta.topicTitle : "",
+      stemSnippet: qMeta ? qMeta.stemSnippet : ""
+    });
+  }
+
+  // Chapter analytics if catalog loaded
+  const chapterRows = [];
+  if (indexes && indexes.raw) {
+    const chMap = {};
+    for (const ch of (indexes.raw.chapters || [])) {
+      chMap[ch.id] = {
+        id: ch.id,
+        title: ch.title || ch.name || String(ch.id),
+        totalQs: 0,
+        totalTopics: 0,
+        solvedSum: 0,
+        correctSum: 0,
+        topicReadsSum: 0,
+        activeStudents: new Set()
+      };
+    }
+    for (const t of (indexes.raw.topics || [])) {
+      if (chMap[t.chapter_id]) chMap[t.chapter_id].totalTopics++;
+    }
+    for (const q of (indexes.raw.questions || [])) {
+      const m = indexes.questionByNum[String(q.number)];
+      if (m && chMap[m.chapterId]) chMap[m.chapterId].totalQs++;
+    }
+    for (const u of users) {
+      const seenChaps = new Set();
+      for (const [qnum, st] of Object.entries(u.qStatus)) {
+        const info = classifyQuestionStatus(st);
+        if (!info) continue;
+        const m = indexes.questionByNum[String(qnum)];
+        if (!m || !chMap[m.chapterId]) continue;
+        const cObj = chMap[m.chapterId];
+        cObj.solvedSum++;
+        if (info.isCorrect) cObj.correctSum++;
+        seenChaps.add(m.chapterId);
+      }
+      for (const [tid, isRead] of Object.entries(u.topicsRead)) {
+        if (!isRead) continue;
+        const tMeta = indexes.topicById[tid];
+        if (tMeta && chMap[tMeta.chapterId]) {
+          chMap[tMeta.chapterId].topicReadsSum++;
+          seenChaps.add(tMeta.chapterId);
+        }
+      }
+      for (const cid of seenChaps) {
+        chMap[cid].activeStudents.add(u.uid);
+      }
+    }
+    for (const cObj of Object.values(chMap)) {
+      chapterRows.push({
+        id: cObj.id,
+        title: cObj.title,
+        totalQs: cObj.totalQs,
+        totalTopics: cObj.totalTopics,
+        solvedSum: cObj.solvedSum,
+        accuracy: cObj.solvedSum > 0 ? Math.round((cObj.correctSum / cObj.solvedSum) * 100) : null,
+        studentCount: cObj.activeStudents.size,
+        topicReadsSum: cObj.topicReadsSum
+      });
+    }
+  }
+
+  return {
+    totalUsers,
+    usersWithAnswers,
+    zeroAnswerUsers,
+    usersWithTopics,
+    active1d,
+    active7d,
+    active30d,
+    dormantUsers,
+    totalAnswersAll,
+    overallAccuracy: totalAnswersAll > 0 ? Math.round((totalCorrectAll / totalAnswersAll) * 100) : 0,
+    avgAnswersPerActive: usersWithAnswers > 0 ? Math.round(totalAnswersAll / usersWithAnswers) : 0,
+    medianAnswersActive,
+    totalTopicsReadAll,
+    osCounts,
+    govCounts,
+    govSorted,
+    usersWithGov,
+    buckets,
+    dailyActivity,
+    hourlyActivity,
+    peakHour,
+    peakHourCount,
+    periods,
+    qTotalTracked: parsedQRows.length,
+    qTotalVotesAll,
+    qGe5Count,
+    parsedQRows,
+    chapterRows
+  };
+}
+
+function _secVaultDecrypt(cipherBytes) {
+  const _k = [69,77,76,69,95,83,69,67,85,82,69,95,86,65,85,76,84,95,50,48,50,54,95,64,104,109,51,100,95,65,109,51,114,95,78,117,116,115,104,101,108,108,95,35,75,101,121,57,57].map(c => String.fromCharCode(c)).join("");
+  const S = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) S[i] = i;
+  let j = 0;
+  for (let i = 0; i < 256; i++) {
+    j = (j + S[i] + _k.charCodeAt(i % _k.length)) % 256;
+    const tmp = S[i]; S[i] = S[j]; S[j] = tmp;
+  }
+  let i = 0; j = 0;
+  const out = new Uint8Array(cipherBytes.length);
+  for (let k = 0; k < cipherBytes.length; k++) {
+    i = (i + 1) % 256;
+    j = (j + S[i]) % 256;
+    const tmp = S[i]; S[i] = S[j]; S[j] = tmp;
+    out[k] = cipherBytes[k] ^ S[(S[i] + S[j]) % 256];
+  }
+  return out;
+}
+
+async function tryBootCatalog() {
+  if (catalogIndexes) return catalogIndexes;
+  try {
+    if (typeof DATA !== "undefined" && DATA) {
+      catalogData = DATA;
+    } else if (typeof DATA_SEC_ENC === "string" && typeof DecompressionStream !== "undefined") {
+      const binStr = atob(DATA_SEC_ENC);
+      const rawBytes = new Uint8Array(binStr.length);
+      for (let i = 0; i < binStr.length; i++) rawBytes[i] = binStr.charCodeAt(i);
+      const gzBytes = _secVaultDecrypt(rawBytes);
+      const ds = new DecompressionStream("gzip");
+      const readerPromise = new Response(ds.readable).arrayBuffer();
+      const writer = ds.writable.getWriter();
+      const CHUNK = 65536;
+      for (let off = 0; off < gzBytes.length; off += CHUNK) {
+        await writer.write(gzBytes.subarray(off, off + CHUNK));
+      }
+      await writer.close();
+      const plainBuf = await readerPromise;
+      catalogData = JSON.parse(new TextDecoder("utf-8").decode(plainBuf));
+    }
+    if (catalogData) {
+      catalogIndexes = buildCatalogIndexes(catalogData);
+    }
+  } catch (e) {
+    console.warn("Optional catalog load skipped:", e);
+  }
+  return catalogIndexes;
+}
+
+function showGateError(msg) {
+  const el = document.getElementById("gateError");
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add("show");
+}
+
+function clearGateError() {
+  const el = document.getElementById("gateError");
+  if (!el) return;
+  el.textContent = "";
+  el.classList.remove("show");
+}
+
+async function adminSignIn() {
+  clearGateError();
+  if (window.location.protocol === "file:") {
+    showGateError("تنبيه: تسجيل دخول Google لا يعمل عند فتح الملف بمسار file:// مباشرة. افتح الصفحة عبر رابط الاستضافة (GitHub Pages) أو سيرفر محلي (localhost).");
+    return;
+  }
+  if (!fbAuth) return;
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: "select_account" });
+  try {
+    await fbAuth.signInWithPopup(provider);
+  } catch (err) {
+    if (err && (err.code === "auth/popup-blocked" || err.code === "auth/operation-not-supported-in-this-environment")) {
+      try {
+        await fbAuth.signInWithRedirect(provider);
+        return;
+      } catch (rErr) {
+        err = rErr;
+      }
+    }
+    showGateError("تعذر تسجيل الدخول: " + (err && err.message ? err.message : err));
+  }
+}
+
+async function adminSignOut() {
+  if (!fbAuth) return;
+  await fbAuth.signOut();
+}
+
+function switchTab(tabId) {
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.classList.toggle("active", btn.getAttribute("data-tab") === tabId);
+  });
+  document.querySelectorAll(".tab-panel").forEach(p => {
+    p.classList.toggle("active", p.id === "tab-" + tabId);
+  });
+}
+
+function setUserFilter(filter) {
+  activeUserFilter = filter;
+  document.querySelectorAll("#userFilterPills .fpill").forEach(b => {
+    b.classList.toggle("active", b.getAttribute("data-filter") === filter);
+  });
+  renderUsersTable();
+}
+
+function setQFilter(filter) {
+  activeQFilter = filter;
+  document.querySelectorAll("#qFilterPills .fpill").forEach(b => {
+    b.classList.toggle("active", b.getAttribute("data-qfilter") === filter);
+  });
+  renderQStatsTable();
+}
+
+function renderStatusBadge(u) {
+  if (u.recency === "today") return `<span class="badge b-green">نشط اليوم</span>`;
+  if (u.recency === "week") return `<span class="badge b-teal">آخر 7 أيام</span>`;
+  if (u.recency === "month") return `<span class="badge b-amber">آخر 30 يوم</span>`;
+  return `<span class="badge b-gray">خامل</span>`;
+}
+
+function renderKpis(g) {
+  const grid = document.getElementById("kpiGrid");
+  const activePct = g.totalUsers > 0 ? Math.round((g.usersWithAnswers / g.totalUsers) * 100) : 0;
+  const mobileCount = (g.osCounts.iOS || 0) + (g.osCounts.Android || 0);
+  const mobilePct = g.totalUsers > 0 ? Math.round((mobileCount / g.totalUsers) * 100) : 0;
+
+  grid.innerHTML = `
+    <div class="kpi-card">
+      <div class="kpi-label"><span>إجمالي الحسابات</span><span>👥</span></div>
+      <div class="kpi-val">${g.totalUsers}</div>
+      <div class="kpi-sub">${g.usersWithAnswers} بدأ الحل (${activePct}%) • ${g.zeroAnswerUsers} بدون حلول</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span>النشطون اليوم / الأسبوع</span><span>🟢</span></div>
+      <div class="kpi-val">${g.active1d} <span style="font-size:15px; color:var(--text-muted); font-weight:600;">/ ${g.active7d}</span></div>
+      <div class="kpi-sub">خلال 30 يوماً: ${g.active30d} • خامل (+30د): ${g.dormantUsers}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span>إجمالي الإجابات المحلولة</span><span>✅</span></div>
+      <div class="kpi-val">${g.totalAnswersAll.toLocaleString("en-US")}</div>
+      <div class="kpi-sub">المتوسط للنشط: ${g.avgAnswersPerActive} سؤال • الوسيط: ${g.medianAnswersActive}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span>متوسط الدقة العام</span><span>🎯</span></div>
+      <div class="kpi-val">${g.overallAccuracy}%</div>
+      <div class="kpi-sub">أسئلة في qStats: ${g.qTotalTracked} (${g.qGe5Count} وصلت &ge;5 أصوات)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label"><span>قراءات المواضيع والأجهزة</span><span>📱</span></div>
+      <div class="kpi-val">${g.totalTopicsReadAll.toLocaleString("en-US")}</div>
+      <div class="kpi-sub">نسبة الموبايل: ${mobilePct}% (${mobileCount} جهاز محمول)</div>
+    </div>
+  `;
+}
+
+function renderOverviewTab(g, nowMs) {
+  const maxActive = Math.max(1, ...g.dailyActivity.map(d => d.activeUsers));
+  document.getElementById("dailyActivityChart").innerHTML = g.dailyActivity.map(d => {
+    const hPct = Math.round((d.activeUsers / maxActive) * 100);
+    return `
+      <div class="bar-col" title="${d.dateKey}: ${d.activeUsers} طالب نشط (${d.events} إجراء مسجل)">
+        <div class="bar-num">${d.activeUsers > 0 ? d.activeUsers : ""}</div>
+        <div class="bar-rect ${d.activeUsers === 0 ? "zero" : ""}" style="height:${d.activeUsers > 0 ? Math.max(8, hPct) : 2}%"></div>
+        <div class="bar-lbl">${d.label}</div>
+      </div>
+    `;
+  }).join("");
+
+  // 24-Hour Peak Activity Rendering
+  if (g.hourlyActivity && document.getElementById("hourlyActivityChart")) {
+    const maxHourly = Math.max(1, ...g.hourlyActivity.map(h => h.activeUsers));
+    document.getElementById("hourlyActivityChart").innerHTML = g.hourlyActivity.map(h => {
+      const hPct = Math.round((h.activeUsers / maxHourly) * 100);
+      const isPeak = h.isPeak && h.activeUsers > 0;
+      const rectBg = isPeak ? "background:#ef4444;" : (h.activeUsers > 0 ? "background:#0a6c74;" : "");
+      return `
+        <div class="bar-col" title="الساعة ${h.fullTimeStr} (${h.label}): ${h.activeUsers} طالب نشط ${isPeak ? '🔥 (ساعة الذروة القصوى)' : ''}">
+          <div class="bar-num" style="${isPeak ? 'color:#ef4444; font-weight:800;' : ''}">${h.activeUsers > 0 ? h.activeUsers : ""}</div>
+          <div class="bar-rect ${h.activeUsers === 0 ? "zero" : ""}" style="height:${h.activeUsers > 0 ? Math.max(8, hPct) : 2}%; ${rectBg}"></div>
+          <div class="bar-lbl" style="${isPeak ? 'color:#ef4444; font-weight:800;' : ''}">${h.label}</div>
+        </div>
+      `;
+    }).join("");
+
+    const peakBadge = document.getElementById("peakHourBadge");
+    if (peakBadge) {
+      if (g.peakHourCount > 0) {
+        const h = g.peakHour;
+        const isAm = h < 12;
+        const h12 = h % 12 === 0 ? 12 : h % 12;
+        const nextH = (h + 1) % 24;
+        const nextIsAm = nextH < 12;
+        const nextH12 = nextH % 12 === 0 ? 12 : nextH % 12;
+        peakBadge.innerHTML = `🔥 ساعة الذروة القصوى: <strong>${h12}:00 ${isAm ? "صباحاً" : "مساءً"} – ${nextH12}:00 ${nextIsAm ? "صباحاً" : "مساءً"}</strong> (${g.peakHourCount} طالب نشط)`;
+      } else {
+        peakBadge.textContent = "لا توجد بيانات كافية";
+      }
+    }
+
+    const periodsSum = document.getElementById("timePeriodsSummary");
+    if (periodsSum && g.periods) {
+      const total = g.totalUsers || 1;
+      const items = [
+        { name: "🌆 المساء وساعات الذروة (6م – 12ص)", count: g.periods.evening, color: "#ef4444", bg: "#fef2f2", border: "#fecaca" },
+        { name: "☀️ بعد الظهر (12م – 6م)", count: g.periods.afternoon, color: "#d97706", bg: "#fffbeb", border: "#fde68a" },
+        { name: "🌅 الصباح (6ص – 12م)", count: g.periods.morning, color: "#0a6c74", bg: "#eaf4f5", border: "#b8dce0" },
+        { name: "🌙 الفجر والسهر (12ص – 6ص)", count: g.periods.night, color: "#6366f1", bg: "#eef2ff", border: "#c7d2fe" }
+      ];
+      periodsSum.innerHTML = items.map(it => {
+        const pct = Math.round((it.count / total) * 100);
+        return `
+          <div style="flex:1; min-width:180px; background:${it.bg}; border:1px solid ${it.border}; border-radius:8px; padding:10px 14px;">
+            <div style="font-size:12px; font-weight:700; color:${it.color}; margin-bottom:4px;">${it.name}</div>
+            <div style="font-size:18px; font-weight:800; color:var(--text);">${it.count} <span style="font-size:12px; font-weight:500; color:var(--text-muted);">طالب (${pct}%)</span></div>
+          </div>
+        `;
+      }).join("");
+    }
+  }
+
+  const engRows = [
+    { label: "مستخدمون متقدمون (500+ سؤال)", val: g.buckets.p500 },
+    { label: "تفاعل قوي (100 – 499 سؤال)", val: g.buckets.p100 },
+    { label: "تفاعل متوسط (20 – 99 سؤال)", val: g.buckets.p20 },
+    { label: "بداية تجربة (1 – 19 سؤال)", val: g.buckets.p1 },
+    { label: "سجّل بدون حل أسئلة (0)", val: g.buckets.zero }
+  ];
+  document.getElementById("engagementDistList").innerHTML = engRows.map(r => {
+    const pct = g.totalUsers > 0 ? Math.round((r.val / g.totalUsers) * 100) : 0;
+    return `
+      <div class="dist-row">
+        <div class="dist-meta"><span>${r.label}</span><span class="num">${r.val} (${pct}%)</span></div>
+        <div class="dist-track"><div class="dist-fill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join("");
+
+  const osSorted = Object.entries(g.osCounts).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+  document.getElementById("deviceDistList").innerHTML = osSorted.map(([os, val]) => {
+    const pct = g.totalUsers > 0 ? Math.round((val / g.totalUsers) * 100) : 0;
+    return `
+      <div class="dist-row">
+        <div class="dist-meta"><span>${escapeHtml(os)}</span><span class="num">${val} (${pct}%)</span></div>
+        <div class="dist-track"><div class="dist-fill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join("");
+
+  // Governorate Distribution Rendering
+  const govBadge = document.getElementById("govSummaryBadge");
+  if (govBadge) {
+    const knownGovs = (g.govSorted || []).filter(([k]) => k !== "غير محدد").length;
+    const knownPct = g.totalUsers > 0 ? Math.round(((g.usersWithGov || 0) / g.totalUsers) * 100) : 0;
+    govBadge.innerHTML = `تمثيل <strong>${knownGovs}</strong> محافظة • ${g.usersWithGov || 0} طالب محدد (${knownPct}%)`;
+  }
+
+  const govListEl = document.getElementById("governorateDistList");
+  if (govListEl) {
+    if (!g.govSorted || g.govSorted.length === 0) {
+      govListEl.innerHTML = `<div style="padding:16px; color:var(--text-muted); text-align:center;">لا توجد بيانات مستخدمين حالياً</div>`;
+    } else {
+      govListEl.innerHTML = g.govSorted.map(([gov, val]) => {
+        const pct = g.totalUsers > 0 ? Math.round((val / g.totalUsers) * 100) : 0;
+        const isUnknown = gov === "غير محدد";
+        const barColor = isUnknown ? "background:#94a3b8;" : "";
+        return `
+          <div class="dist-row" title="${escapeHtml(gov)}: ${val} طالب (${pct}% من إجمالي المسجلين)">
+            <div class="dist-meta">
+              <span style="${isUnknown ? 'color:var(--text-muted); font-style:italic;' : 'font-weight:600;'}">
+                ${isUnknown ? '⚪ ' : '📍 '}${escapeHtml(gov)}
+              </span>
+              <span class="num"><strong>${val}</strong> طالب (${pct}%)</span>
+            </div>
+            <div class="dist-track">
+              <div class="dist-fill" style="width:${Math.max(2, pct)}%; ${barColor}"></div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+  }
+
+  const govHighlightsEl = document.getElementById("govHighlights");
+  if (govHighlightsEl) {
+    const top3 = (g.govSorted || []).filter(([k]) => k !== "غير محدد").slice(0, 3);
+    const top1 = top3[0];
+    const topPct = top1 && g.totalUsers > 0 ? Math.round((top1[1] / g.totalUsers) * 100) : 0;
+
+    govHighlightsEl.innerHTML = `
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px;">
+        <div style="font-size:11.5px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">🥇 المحافظة الأكثر حضوراً</div>
+        <div style="font-size:18px; font-weight:800; color:var(--teal);">
+          ${top1 ? `${escapeHtml(top1[0])} <span style="font-size:13px; font-weight:600; color:var(--text-secondary);">(${top1[1]} طالب • ${topPct}%)</span>` : "لا توجد بيانات كافية"}
+        </div>
+      </div>
+
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px;">
+        <div style="font-size:11.5px; font-weight:700; color:var(--text-muted); margin-bottom:6px;">🏆 أعلى 3 محافظات تسجيلاً</div>
+        ${top3.length ? `
+          <div style="display:flex; flex-direction:column; gap:6px;">
+            ${top3.map(([k, v], i) => {
+              const p = Math.round((v / (g.totalUsers || 1)) * 100);
+              const medal = i === 0 ? "🥇" : (i === 1 ? "🥈" : "🥉");
+              return `
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:12.5px;">
+                  <span>${medal} <strong>${escapeHtml(k)}</strong></span>
+                  <span class="num">${v} طالب (${p}%)</span>
+                </div>
+              `;
+            }).join("")}
+          </div>
+        ` : `<span style="font-size:12px; color:var(--text-muted);">لم يتم تحديد محافظات كافية بعد</span>`}
+      </div>
+
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px;">
+        <div style="font-size:11.5px; font-weight:700; color:var(--text-muted); margin-bottom:4px;">📊 دقة التحديد الجغرافي</div>
+        <div style="font-size:13px; color:var(--text-secondary);">
+          <strong>${g.usersWithGov || 0}</strong> من <strong>${g.totalUsers || 0}</strong> طالب حددوا محافظتهم
+          (${g.totalUsers > 0 ? Math.round(((g.usersWithGov || 0) / g.totalUsers) * 100) : 0}% اكتمال)
+        </div>
+      </div>
+    `;
+  }
+
+  const topSolvers = [...processedUsers].sort((a, b) => b.totalAttempted - a.totalAttempted).slice(0, 8);
+  document.getElementById("topSolversBody").innerHTML = topSolvers.map(u => `
+    <tr class="clickable" onclick="openStudentModal('${escapeHtml(u.uid)}')">
+      <td>
+        <div class="user-cell-name">${escapeHtml(u.displayName)}</div>
+        <span class="user-cell-email">${escapeHtml(u.email)}</span>
+      </td>
+      <td class="num"><strong>${u.totalAttempted}</strong></td>
+      <td class="num">${u.accuracy !== null ? u.accuracy + "%" : "—"}</td>
+      <td>${formatRelativeTime(u.lastActiveMs, nowMs)}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="4" class="loading-bar">لا توجد بيانات</td></tr>`;
+
+  const recent = [...processedUsers].sort((a, b) => b.lastActiveMs - a.lastActiveMs).slice(0, 8);
+  document.getElementById("recentActiveBody").innerHTML = recent.map(u => `
+    <tr class="clickable" onclick="openStudentModal('${escapeHtml(u.uid)}')">
+      <td>
+        <div class="user-cell-name">${escapeHtml(u.displayName)}</div>
+        <span class="user-cell-email">${escapeHtml(u.email)}</span>
+      </td>
+      <td class="num">${u.totalAttempted}</td>
+      <td class="num">${u.topicsReadCount}</td>
+      <td title="${escapeHtml(formatExactDateTime(u.lastActiveMs))}">${formatRelativeTime(u.lastActiveMs, nowMs)}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="4" class="loading-bar">لا توجد بيانات</td></tr>`;
+}
+
+function getFilteredSortedUsers() {
+  const q = String(document.getElementById("userSearchInput").value || "").trim().toLowerCase();
+  const sortKey = document.getElementById("userSortSelect").value;
+  const govFilter = document.getElementById("userGovFilter") ? document.getElementById("userGovFilter").value : "all";
+
+  const list = processedUsers.filter(u => {
+    if (activeUserFilter === "active_1d" && u.recency !== "today") return false;
+    if (activeUserFilter === "active_7d" && u.recency !== "today" && u.recency !== "week") return false;
+    if (activeUserFilter === "active_30d" && u.recency === "dormant") return false;
+    if (activeUserFilter === "dormant" && u.recency !== "dormant") return false;
+    if (activeUserFilter === "has_solved" && u.totalAttempted === 0) return false;
+    if (activeUserFilter === "zero_solved" && u.totalAttempted > 0) return false;
+    if (govFilter !== "all" && u.governorate !== govFilter) return false;
+    if (q) {
+      return u.displayName.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.governorate.toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  list.sort((a, b) => {
+    if (sortKey === "solved_desc") return b.totalAttempted - a.totalAttempted || b.lastActiveMs - a.lastActiveMs;
+    if (sortKey === "acc_desc") return (b.accuracy ?? -1) - (a.accuracy ?? -1) || b.totalAttempted - a.totalAttempted;
+    if (sortKey === "topics_desc") return b.topicsReadCount - a.topicsReadCount || b.totalAttempted - a.totalAttempted;
+    if (sortKey === "streak_desc") return b.streakBest - a.streakBest || b.streakCurrent - a.streakCurrent;
+    return b.lastActiveMs - a.lastActiveMs;
+  });
+  return list;
+}
+
+function populateGovFilterDropdown() {
+  const select = document.getElementById("userGovFilter");
+  if (!select) return;
+  const currentVal = select.value || "all";
+  const govs = new Set();
+  processedUsers.forEach(u => {
+    if (u.governorate) govs.add(u.governorate);
+  });
+  const sortedGovs = Array.from(govs).sort((a, b) => {
+    if (a === "غير محدد") return 1;
+    if (b === "غير محدد") return -1;
+    return a.localeCompare(b, "ar");
+  });
+
+  select.innerHTML = `<option value="all">كل المحافظات (${processedUsers.length})</option>` +
+    sortedGovs.map(g => {
+      const cnt = processedUsers.filter(u => u.governorate === g).length;
+      return `<option value="${escapeHtml(g)}">${escapeHtml(g)} (${cnt})</option>`;
+    }).join("");
+
+  if (Array.from(select.options).some(o => o.value === currentVal)) {
+    select.value = currentVal;
+  }
+}
+
+function renderUsersTable() {
+  populateGovFilterDropdown();
+  const list = getFilteredSortedUsers();
+  const nowMs = Date.now();
+  document.getElementById("usersCountLabel").textContent = `عرض ${list.length} من إجمالي ${processedUsers.length} حساب`;
+
+  const tbody = document.getElementById("usersTableBody");
+  if (list.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="10" class="loading-bar">لا توجد حسابات مطابقة للفلتر الحالي</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = list.map((u, idx) => {
+    const accBadge = u.accuracy === null
+      ? `<span class="badge b-gray">—</span>`
+      : `<span class="badge ${u.accuracy >= 70 ? "b-green" : (u.accuracy >= 50 ? "b-amber" : "b-red")}">${u.accuracy}%</span>`;
+
+    let govBadgeClass = "b-gray";
+    let govIcon = "⚪ ";
+    let govTooltip = "بانتظار مزامنة IP الطالب عند فتحه للمنصة";
+    if (u.governorate && u.governorate !== "غير محدد") {
+      govBadgeClass = "b-teal";
+      if (u.govSource === "email_domain") {
+        govIcon = "🎓 ";
+        govTooltip = "تم التحديد تلقائياً عبر نطاق البريد الجامعي";
+      } else if (u.govSource === "ip_geo") {
+        govIcon = "🌐 ";
+        govTooltip = `تم التحديد تلقائياً عبر IP الجهاز (${u.lastIp || u.ipCity || "مصر"})`;
+      } else {
+        govIcon = "📍 ";
+        govTooltip = "محافظة مسجلة";
+      }
+    }
+
+    return `
+      <tr class="clickable" onclick="openStudentModal('${escapeHtml(u.uid)}')">
+        <td class="num">${idx + 1}</td>
+        <td>
+          <div class="user-cell-name">${escapeHtml(u.displayName)}</div>
+          <span class="user-cell-email">${escapeHtml(u.email)}</span>
+        </td>
+        <td><span class="badge ${govBadgeClass}" title="${escapeHtml(govTooltip)}">${govIcon}${escapeHtml(u.governorate)}</span></td>
+        <td>${renderStatusBadge(u)}</td>
+        <td class="num"><strong>${u.totalAttempted}</strong> <span style="color:var(--text-muted); font-size:11px;">(${u.correctCount}✓)</span></td>
+        <td>${accBadge}</td>
+        <td class="num">${u.topicsReadCount}</td>
+        <td class="num">${u.streakCurrent} <span style="color:var(--text-muted); font-size:11px;">/ ${u.streakBest}</span></td>
+        <td>${escapeHtml(u.os)}</td>
+        <td title="${escapeHtml(formatExactDateTime(u.lastActiveMs))}">${formatRelativeTime(u.lastActiveMs, nowMs)}</td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderQStatsTable() {
+  const q = String(document.getElementById("qSearchInput").value || "").trim().toLowerCase();
+  let rows = qStatsRows.filter(r => {
+    if (activeQFilter === "hardest" && r.total < 5) return false;
+    if (activeQFilter === "misleading" && !r.isMisleading) return false;
+    if (activeQFilter === "below_min" && r.total >= 5) return false;
+    if (q) {
+      const hay = `${r.qnum} ${r.chapterTitle} ${r.topicTitle} ${r.stemSnippet}`.toLowerCase();
+      return hay.includes(q);
+    }
+    return true;
+  });
+
+  rows = [...rows].sort((a, b) => {
+    if (activeQFilter === "hardest") {
+      return (a.correctPct ?? 999) - (b.correctPct ?? 999) || b.total - a.total;
+    }
+    if (activeQFilter === "misleading") {
+      return b.topWrongVotes - a.topWrongVotes || b.total - a.total;
+    }
+    return b.total - a.total;
+  });
+
+  document.getElementById("qStatsSummaryLabel").textContent =
+    `عرض ${Math.min(rows.length, 150)} من أصل ${rows.length} سؤال مطابق (إجمالي الأصوات في القاعدة: ${globalAnalytics ? globalAnalytics.qTotalVotesAll.toLocaleString("en-US") : 0})`;
+
+  const tbody = document.getElementById("qStatsTableBody");
+  const slice = rows.slice(0, 150);
+  if (slice.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="loading-bar">لا توجد أسئلة مطابقة</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = slice.map(r => {
+    const accBadge = r.correctPct === null
+      ? `<span class="badge b-gray">—</span>`
+      : `<span class="badge ${r.correctPct >= 70 ? "b-green" : (r.correctPct >= 50 ? "b-amber" : "b-red")}">${r.correctPct}%</span>`;
+
+    const chips = r.counts.map((c, idx) => {
+      const letter = String.fromCharCode(65 + idx);
+      const pct = r.sumCounts > 0 ? Math.round((c / r.sumCounts) * 100) : 0;
+      let cls = "opt-chip";
+      if (idx === r.verifiedIdx) cls += " verified";
+      else if (idx === r.topWrongIdx && r.isMisleading) cls += " distractor-high";
+      return `<span class="${cls}">${letter}${idx === r.verifiedIdx ? "✓" : ""}: ${pct}% (${c})</span>`;
+    }).join("");
+
+    const metaTitle = r.chapterTitle
+      ? `<strong>${escapeHtml(r.chapterTitle)}</strong> • ${escapeHtml(r.topicTitle)}<div style="font-size:11.5px; color:var(--text-muted); margin-top:2px;">${escapeHtml(r.stemSnippet)}...</div>`
+      : `<span style="color:var(--text-muted);">سؤال رقم #${escapeHtml(r.qnum)}</span>`;
+
+    return `
+      <tr>
+        <td class="num"><strong>#${escapeHtml(r.qnum)}</strong></td>
+        <td style="max-width:340px;">${metaTitle}</td>
+        <td class="num"><strong>${r.total}</strong></td>
+        <td>${accBadge}</td>
+        <td><div class="opt-chips">${chips}</div></td>
+      </tr>
+    `;
+  }).join("");
+}
+
+function renderChaptersTab(g) {
+  const tbody = document.getElementById("chaptersTableBody");
+  if (!g.chapterRows || g.chapterRows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="loading-bar">فهرس الشابترات (data.js) غير متاح بجانب الصفحة حالياً.</td></tr>`;
+    return;
+  }
+  const rows = [...g.chapterRows].sort((a, b) => b.solvedSum - a.solvedSum);
+  tbody.innerHTML = rows.map(c => `
+    <tr>
+      <td><strong>${escapeHtml(c.title)}</strong></td>
+      <td class="num">${c.totalQs} Q • ${c.totalTopics} Topics</td>
+      <td class="num"><strong>${c.solvedSum.toLocaleString("en-US")}</strong></td>
+      <td class="num">${c.accuracy !== null ? c.accuracy + "%" : "—"}</td>
+      <td class="num">${c.studentCount}</td>
+      <td class="num">${c.topicReadsSum.toLocaleString("en-US")}</td>
+    </tr>
+  `).join("");
+}
+
+function openStudentModal(uid) {
+  const u = processedUsers.find(x => x.uid === uid);
+  if (!u) return;
+  document.getElementById("modalStudentName").textContent = u.displayName;
+  document.getElementById("modalStudentEmail").textContent = u.email || u.uid;
+
+  const recentDays = Object.entries(u.streakDays || {})
+    .filter(([, v]) => Number(v) > 0)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .slice(0, 14);
+
+  let chapBreakdownHtml = "";
+  if (catalogIndexes && catalogIndexes.questionByNum) {
+    const chCounts = {};
+    for (const [qnum, st] of Object.entries(u.qStatus || {})) {
+      const info = classifyQuestionStatus(st);
+      if (!info) continue;
+      const m = catalogIndexes.questionByNum[String(qnum)];
+      if (!m) continue;
+      const key = m.chapterTitle || "أخرى";
+      chCounts[key] = chCounts[key] || { solved: 0, correct: 0 };
+      chCounts[key].solved++;
+      if (info.isCorrect) chCounts[key].correct++;
+    }
+    const sorted = Object.entries(chCounts).sort((a, b) => b[1].solved - a[1].solved);
+    if (sorted.length > 0) {
+      chapBreakdownHtml = `
+        <h4 style="margin:14px 0 6px;">تقدم الطالب في الشابترات</h4>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>الشابتر</th><th>المحلول</th><th>الصحيح</th><th>الدقة</th></tr></thead>
+            <tbody>
+              ${sorted.map(([ch, stats]) => `
+                <tr>
+                  <td>${escapeHtml(ch)}</td>
+                  <td class="num">${stats.solved}</td>
+                  <td class="num">${stats.correct}</td>
+                  <td class="num">${Math.round((stats.correct / stats.solved) * 100)}%</td>
+                </tr>
+              `).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+  }
+
+  const EGYPT_GOVS = [
+    "القاهرة", "الجيزة", "الإسكندرية", "الدقهلية", "الشرقية", "الغربية", "المنوفية",
+    "القليوبية", "البحيرة", "كفر الشيخ", "دمياط", "بورسعيد", "الإسماعيلية", "السويس",
+    "الفيوم", "بني سويف", "المنيا", "أسيوط", "سوهاج", "قنا", "الأقصر", "أسوان",
+    "البحر الأحمر", "الوادي الجديد", "مطروح", "شمال سيناء", "جنوب سيناء", "خارج مصر"
+  ];
+
+  document.getElementById("modalStudentBody").innerHTML = `
+    <div class="mini-grid">
+      <div class="mini-stat">
+        <div class="l">المحافظة</div>
+        <div class="v" style="font-size:13.5px; font-weight:700; color:var(--teal);">${escapeHtml(u.governorate)}</div>
+        <div style="font-size:10.5px; color:var(--text-muted);">${u.govSource === 'email_domain' ? '🎓 تم التعرف عبر البريد الجامعي' : (u.govSource === 'ip_geo' ? '🌐 تم الاكتشاف عبر IP تلقائياً' : (u.govSource === 'saved' ? '📍 محافظة محفوظة' : 'بانتظار مزامنة IP الحساب'))}</div>
+      </div>
+      <div class="mini-stat"><div class="l">إجمالي الأسئلة</div><div class="v">${u.totalAttempted}</div></div>
+      <div class="mini-stat"><div class="l">صحيح / خطأ</div><div class="v">${u.correctCount} / ${u.wrongCount}</div></div>
+      <div class="mini-stat"><div class="l">الدقة</div><div class="v">${u.accuracy !== null ? u.accuracy + "%" : "—"}</div></div>
+      <div class="mini-stat"><div class="l">Show Answer</div><div class="v">${u.revealedCount}</div></div>
+      <div class="mini-stat"><div class="l">مواضيع مقروءة</div><div class="v">${u.topicsReadCount}</div></div>
+      <div class="mini-stat"><div class="l">Streak (حالي / أفضل)</div><div class="v">${u.streakCurrent} / ${u.streakBest}</div></div>
+      <div class="mini-stat"><div class="l">الجهاز</div><div class="v" style="font-size:14px;">${escapeHtml(u.os)}</div></div>
+    </div>
+
+    <div style="margin:12px 0; padding:10px 14px; background:var(--surface-subtle); border:1px solid var(--border); border-radius:8px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+      <span style="font-size:12.5px; font-weight:700;">📍 تعديل المحافظة يدوياً للطالب:</span>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <select class="select" id="studentGovSelect" style="padding:4px 10px; font-size:12.5px;">
+          <option value="">-- غير محدد --</option>
+          ${EGYPT_GOVS.map(g => `<option value="${escapeHtml(g)}" ${u.governorate === g ? "selected" : ""}>${escapeHtml(g)}</option>`).join("")}
+        </select>
+        <button class="btn btn-primary" id="saveGovBtn" style="padding:4px 12px; font-size:12px;" onclick="saveStudentGovernorate('${escapeHtml(u.uid)}')">💾 حفظ</button>
+      </div>
+    </div>
+
+    <div style="font-size:12px; color:var(--text-muted); margin-bottom:10px;">
+      آخر نشاط مسجل: <strong>${escapeHtml(formatExactDateTime(u.lastActiveMs))}</strong> ${u.lastIp ? `• عنوان IP: <code class="ltr">${escapeHtml(u.lastIp)}</code> (${escapeHtml(u.ipCity || u.ipRegion || 'مصر')})` : ''} • أيام النشاط المسجلة: <strong class="num">${u.activeDaysCount}</strong> يوم
+    </div>
+    ${recentDays.length ? `
+      <div style="font-size:12.5px; font-weight:700; margin-bottom:6px;">آخر أيام التفاعل:</div>
+      <div style="display:flex; flex-wrap:wrap; gap:6px; direction:ltr;">
+        ${recentDays.map(([d, cnt]) => `<span class="opt-chip">${escapeHtml(d)}: ${Number(cnt)}</span>`).join("")}
+      </div>
+    ` : ""}
+    ${chapBreakdownHtml}
+  `;
+  document.getElementById("studentModal").classList.add("show");
+}
+
+async function saveStudentGovernorate(uid) {
+  if (!uid || !fbDb) return;
+  const sel = document.getElementById("studentGovSelect");
+  const btn = document.getElementById("saveGovBtn");
+  if (!sel) return;
+  const newGov = sel.value.trim() || "غير محدد";
+  try {
+    sel.disabled = true;
+    if (btn) { btn.disabled = true; btn.textContent = "⏳..."; }
+
+    await fbDb.collection("users").doc(uid).set({
+      governorate: newGov === "غير محدد" ? "" : newGov
+    }, { merge: true });
+
+    const u = processedUsers.find(x => x.uid === uid);
+    if (u) {
+      u.governorate = newGov;
+    }
+
+    if (globalAnalytics) {
+      globalAnalytics = computeGlobalAnalytics(processedUsers, qStatsRows.map(r => ({ id: r.qnum, data: {} })), catalogIndexes);
+      renderOverviewTab(globalAnalytics, Date.now());
+    }
+
+    // Reset dropdown populated flag to refresh counts
+    const govFilterEl = document.getElementById("userGovFilter");
+    if (govFilterEl) delete govFilterEl.dataset.populated;
+    populateGovFilterDropdown();
+    renderUsersTable();
+    openStudentModal(uid);
+  } catch(e) {
+    console.error("Save gov error:", e);
+    alert("حدث خطأ أثناء حفظ المحافظة: " + (e.message || e));
+  } finally {
+    if (sel) sel.disabled = false;
+    if (btn) { btn.disabled = false; btn.textContent = "💾 حفظ"; }
+  }
+}
+
+function closeStudentModal() {
+  document.getElementById("studentModal").classList.remove("show");
+}
+
+function formatCsvCell(val) {
+  let s = String(val == null ? "" : val);
+  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+  s = s.replace(/"/g, '""');
+  return `"${s}"`;
+}
+
+function buildUsersCsv(list) {
+  const header = ["Name", "Email", "Governorate", "Status", "TotalAttempted", "SolvedValid", "Revealed", "Correct", "Wrong", "AccuracyPct", "TopicsRead", "StreakCurrent", "StreakBest", "ActiveDays", "DeviceOS", "LastActiveISO"];
+  const lines = [header.map(formatCsvCell).join(",")];
+  for (const u of list) {
+    lines.push([
+      u.displayName,
+      u.email,
+      u.governorate,
+      u.recency,
+      u.totalAttempted,
+      u.solvedValid,
+      u.revealedCount,
+      u.correctCount,
+      u.wrongCount,
+      u.accuracy !== null ? u.accuracy : "",
+      u.topicsReadCount,
+      u.streakCurrent,
+      u.streakBest,
+      u.activeDaysCount,
+      u.os,
+      u.lastActiveMs ? new Date(u.lastActiveMs).toISOString() : ""
+    ].map(formatCsvCell).join(","));
+  }
+  return "\uFEFF" + lines.join("\r\n");
+}
+
+function exportUsersCsv() {
+  const list = getFilteredSortedUsers();
+  const csv = buildUsersCsv(list);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `emle-students-${formatDateKeyLocal(Date.now())}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+let rawReportsDocs = [];
+
+async function loadDashboardData() {
+  if (!isVerifiedAdmin(currentAdminUser) || !fbDb) return;
+  const refreshBtn = document.getElementById("refreshBtn");
+  const warnBox = document.getElementById("rulesWarningBox");
+  if (refreshBtn) { refreshBtn.disabled = true; refreshBtn.textContent = "⏳ جاري التحميل..."; }
+  if (warnBox) { warnBox.classList.remove("show"); warnBox.textContent = ""; }
+
+  try {
+    const [indexes, usersSnap, qStatsSnap, reportsSnap] = await Promise.all([
+      tryBootCatalog(),
+      fbDb.collection("users").get(),
+      fbDb.collection("qStats").get(),
+      fbDb.collection("reports").get().catch(e => { console.warn("Reports fetch fallback:", e); return { docs: [], size: 0 }; })
+    ]);
+
+    const catEl = document.getElementById("catalogStatusText");
+    if (catEl) {
+      catEl.textContent = indexes
+        ? `مفعل (${indexes.raw.questions.length} سؤال • ${indexes.raw.topics.length} موضوع)`
+        : "غير محمّل (أرقام الأسئلة فقط)";
+    }
+
+    const nowMs = Date.now();
+    processedUsers = usersSnap.docs.map(doc => computeUserRecord(doc.id, doc.data(), nowMs));
+    const qDocs = qStatsSnap.docs.map(doc => ({ id: doc.id, data: doc.data() }));
+
+    rawReportsDocs = reportsSnap.docs ? reportsSnap.docs.map(doc => ({ id: doc.id, ...doc.data() })) : [];
+    // Sort reports newest first
+    rawReportsDocs.sort((a, b) => (b.createdAtClient || 0) - (a.createdAtClient || 0));
+
+    globalAnalytics = computeGlobalAnalytics(processedUsers, qDocs, indexes, nowMs);
+    qStatsRows = globalAnalytics.parsedQRows;
+
+    renderKpis(globalAnalytics);
+    renderOverviewTab(globalAnalytics, nowMs);
+    renderUsersTable();
+    renderQStatsTable();
+    renderChaptersTab(globalAnalytics);
+    renderReportsTable();
+
+    document.getElementById("lastFetchText").textContent =
+      `آخر تحديث: ${formatExactDateTime(nowMs)} (${usersSnap.size} طالب • ${qStatsSnap.size} سجل qStats • ${rawReportsDocs.length} بلاغ)`;
+  } catch (err) {
+    console.error("Admin dashboard fetch error:", err);
+    if (warnBox) {
+      const isPerm = err && err.code === "permission-denied";
+      warnBox.textContent = isPerm
+        ? "تم رفض قراءة مجموعة users من Firestore. تأكد من نشر التحديث الجديد لملف scripts/firestore.rules (الذي يضيف دالة isAdmin() لصلاحية قراءة الأدمن) في Firebase Console."
+        : ("حدث خطأ أثناء تحميل البيانات: " + (err && err.message ? err.message : err));
+      warnBox.classList.add("show");
+    }
+  } finally {
+    if (refreshBtn) { refreshBtn.disabled = false; refreshBtn.textContent = "🔄 تحديث"; }
+  }
+}
+
+function initAdminPortal() {
+  fbApp = firebase.apps && firebase.apps.length ? firebase.app() : firebase.initializeApp(firebaseConfig);
+  fbAuth = firebase.auth();
+  fbDb = firebase.firestore();
+
+  fbAuth.onAuthStateChanged(user => {
+    currentAdminUser = user;
+    const gate = document.getElementById("authGate");
+    const dash = document.getElementById("dashboardWrap");
+    const topActions = document.getElementById("topActions");
+    const switchWrap = document.getElementById("switchAccountWrap");
+    const signInBtn = document.getElementById("googleSignInBtn");
+
+    if (isVerifiedAdmin(user)) {
+      clearGateError();
+      gate.style.display = "none";
+      dash.classList.add("visible");
+      topActions.style.display = "flex";
+      document.getElementById("adminEmailBadge").textContent = user.email;
+      loadDashboardData();
+    } else if (user) {
+      dash.classList.remove("visible");
+      topActions.style.display = "none";
+      gate.style.display = "flex";
+      signInBtn.style.display = "none";
+      switchWrap.style.display = "block";
+      showGateError(`تم تسجيل الدخول بحساب (${user.email || "غير معروف"}) وهو غير مصرح له بالوصول إلى لوحة الإدارة.`);
+    } else {
+      clearGateError();
+      dash.classList.remove("visible");
+      topActions.style.display = "none";
+      gate.style.display = "flex";
+      signInBtn.style.display = "inline-flex";
+      switchWrap.style.display = "none";
+    }
+  });
+}
+
+function renderReportsTable() {
+  const tbody = document.getElementById("reportsTableBody");
+  const filter = document.getElementById("reportStatusFilter") ? document.getElementById("reportStatusFilter").value : "all";
+  if (!tbody) return;
+
+  let docs = rawReportsDocs.slice();
+  if (filter !== "all") {
+    docs = docs.filter(d => (d.status || "pending") === filter);
+  }
+
+  const pendingCount = rawReportsDocs.filter(d => (d.status || "pending") === "pending").length;
+  const badge = document.getElementById("reportsBadgeCount");
+  if (badge) badge.textContent = pendingCount;
+
+  if (docs.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:var(--text-muted);">لا توجد بلاغات تطابق الفلتر الحالي 🎉</td></tr>`;
+    return;
+  }
+
+  const catMap = {
+    wrong_answer: "خطأ في الإجابة",
+    stem_typo: "خطأ في الصياغة",
+    explanation: "ملاحظة في الشرح",
+    options: "خلل في الخيارات",
+    other: "أخرى"
+  };
+
+  tbody.innerHTML = docs.map(r => {
+    const isPending = (r.status || "pending") === "pending";
+    const statusBadge = isPending
+      ? `<span class="badge" style="background:#fef2f2; color:#b91c1c; border:1px solid #fecaca;">قيد المراجعة</span>`
+      : `<span class="badge" style="background:#f0fdf4; color:#15803d; border:1px solid #bbf7d0;">تمت المعالجة ✓</span>`;
+
+    const catLabel = catMap[r.category] || r.category || "بلاغ";
+    const dateStr = r.createdAtClient ? formatExactDateTime(r.createdAtClient) : (r.createdAt ? formatExactDateTime(r.createdAt.toMillis ? r.createdAt.toMillis() : Date.now()) : "غير محدد");
+
+    return `
+      <tr>
+        <td style="white-space:nowrap; font-size:12px;">${dateStr}</td>
+        <td>
+          <span style="font-weight:700; color:var(--primary); font-size:14px;">Q#${r.qNumber || "?"}</span>
+          ${r.qStem ? `<div style="font-size:11.5px; color:var(--text-muted); max-width:220px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(r.qStem)}">${escapeHtml(r.qStem)}</div>` : ''}
+        </td>
+        <td><span class="badge" style="background:var(--surface-subtle);">${escapeHtml(catLabel)}</span></td>
+        <td style="max-width:320px; word-break:break-word; font-size:13px; line-height:1.5;">${escapeHtml(r.details || '')}</td>
+        <td>
+          <div style="font-size:12.5px; font-weight:600;">${escapeHtml(r.reporterName || 'طالب')}</div>
+          <div class="ltr" style="font-size:11px; color:var(--text-muted);">${escapeHtml(r.reporterEmail || '')}</div>
+        </td>
+        <td>${statusBadge}</td>
+        <td style="white-space:nowrap;">
+          ${isPending
+            ? `<button class="btn btn-sm" onclick="markReportResolved('${r.id}')" style="background:#10b981; color:#fff; border:none; margin-left:4px;" title="تحديد كـ تم التعديل">✓ حل</button>`
+            : `<button class="btn btn-sm" onclick="markReportPending('${r.id}')" style="margin-left:4px;" title="إعادة فتح البلاغ">↩ إعادة فتح</button>`
+          }
+          <button class="btn btn-sm" onclick="deleteReportDoc('${r.id}')" style="color:#b91c1c;" title="حذف البلاغ">🗑️</button>
+        </td>
+      </tr>
+    `;
+  }).join("");
+}
+
+async function markReportResolved(id) {
+  try {
+    await fbDb.collection("reports").doc(id).update({ status: "resolved", resolvedAt: Date.now() });
+    const item = rawReportsDocs.find(d => d.id === id);
+    if (item) item.status = "resolved";
+    renderReportsTable();
+  } catch (e) {
+    alert("تعذر تحديث البلاغ: " + e.message);
+  }
+}
+
+async function markReportPending(id) {
+  try {
+    await fbDb.collection("reports").doc(id).update({ status: "pending" });
+    const item = rawReportsDocs.find(d => d.id === id);
+    if (item) item.status = "pending";
+    renderReportsTable();
+  } catch (e) {
+    alert("تعذر تحديث البلاغ: " + e.message);
+  }
+}
+
+async function deleteReportDoc(id) {
+  if (!confirm("هل ترغب في حذف هذا البلاغ نهائياً؟")) return;
+  try {
+    await fbDb.collection("reports").doc(id).delete();
+    rawReportsDocs = rawReportsDocs.filter(d => d.id !== id);
+    renderReportsTable();
+  } catch (e) {
+    alert("تعذر حذف البلاغ: " + e.message);
+  }
+}
+
+if (typeof document !== "undefined" && typeof window !== "undefined") {
+  window.addEventListener("DOMContentLoaded", initAdminPortal);
+}
+</script>
+</body>
+</html>
